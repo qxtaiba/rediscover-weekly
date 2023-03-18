@@ -13,8 +13,8 @@ def lambda_handler(event, context):
     client_id = secrets_json['spotify_client_id']
     client_secret = secrets_json['spotify_client_secret']
     refresh_token = secrets_json['refresh_token']
-    access_token = secrets_json.get('access_token')
-    expires_at = secrets_json.get('expires_at')
+    access_token = secrets_json['access_token']
+    expires_at = secrets_json['expires_at']
 
     # Authenticate using SpotifyOAuth and get a new access token if needed with 5 min buffer
     if access_token is None or time.time() > expires_at - 300:
