@@ -61,7 +61,7 @@ def generate_access_token(client_id, client_secret, secrets_manager):
     access_token = sp._auth_manager.get_access_token()
     expires_at = datetime.now() + timedelta(seconds=access_token['expires_in'])
     # Store the new access token and expiry time in Secret Manager
-    secrets_manager.put_secret_value(SecretId='spotify-access-token', SecretString=json.dumps({
+    secrets_manager.put_secret_value(SecretId='spotify-credentials', SecretString=json.dumps({
         'access_token': access_token['access_token'],
         'expiry_at': expires_at.isoformat()
     }))
