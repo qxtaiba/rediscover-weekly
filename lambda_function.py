@@ -25,13 +25,13 @@ def lambda_handler(event, context):
 
     # Get the access token and its expiry time
     latest_access_token, latest_expires_at = get_access_token(client_id, client_secret, access_token, expires_at)
-    
+
     if latest_access_token != access_token:
         secrets_manager.put_secret_value(
                 SecretId='spotify-credentials',
                 SecretString=json.dumps({
-                    'access_token': access_token,
-                    'expires_at': expires_at.isoformat()
+                    'access_token': latest_access_token,
+                    'expires_at': latest_expires_at.isoformat()
                 })
             )
 
