@@ -46,12 +46,12 @@ def get_access_token_from_secret(secrets_manager, client_id, client_secret):
     secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
     secrets_json = json.loads(secrets_response['SecretString'])
     access_token = secrets_json['access_token']
-    expiry_time = datetime.fromisoformat(secrets_json['expiry_time'])
-    return access_token, expiry_time
+    expires_at = datetime.fromisoformat(secrets_json['expires_at'])
+    return access_token, expires_at
 
 
-def is_access_token_expired(expiry_time):
-    return expiry_time - timedelta(minutes=5) <= datetime.now()
+def is_access_token_expired(expires_at):
+    return expires_at - timedelta(minutes=5) <= datetime.now()
 
 
 def generate_access_token(client_id, client_secret, secrets_manager):
