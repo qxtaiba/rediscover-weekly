@@ -49,11 +49,10 @@ def get_access_token(client_id, client_secret):
 def get_playlist_tracks(sp, playlist_id):
     results = sp.playlist_items(playlist_id, fields='items.track.uri,total', additional_types=['track'])
     tracks = results['items']
-    while results['next']:
+    while results.get('next'):
         results = sp.next(results)
         tracks.extend(results['items'])
     return [track['track']['uri'] for track in tracks]
-
 
 def add_tracks_to_playlist(sp, playlist_id, track_uris):
     sp.playlist_add_items(playlist_id, track_uris)
