@@ -11,25 +11,24 @@ The Lambda function is written in Python and utilizes the following AWS services
 - **AWS CloudWatch Events**: the function is triggered by a scheduled event created using CloudWatch Events.
 
 ```
-            +------------------------+
-            |    CloudWatch Events   |
-            +------------------------+
-                       |
-                       v
-               +-----------------+
-               |   AWS Lambda    |
-               +-----------------+
-                       |
-                       v
-               +-----------------+
-               | Secrets Manager |
-               +-----------------+
-                       |
-                       v
-               +-----------------+
-               |   Spotify API   |
-               +-----------------+
-
+        +-------------------------+
+        |    CloudWatch Events    |
+        +-------------------------+
+                    |
+                    v
+            +-----------------+
+            |   AWS Lambda    |
+            +-----------------+
+                    |
+                    v
+            +-----------------+
+            | Secrets Manager |
+            +-----------------+
+                    |
+                    v
+            +-----------------+
+            |   Spotify API   |
+            +-----------------+
 ```
 
 The function flow is as follows:
@@ -64,7 +63,7 @@ In order to use this implementation, you need:
 2. Click the "Create an App" button and follow the prompts to create a new Spotify app.
 3. Add http://localhost:8080/callback/ to the Redirect URIs in the Spotify app settings.
 4. Once your app is created, make note of the Client ID and Client Secret values.
-5. In order to generate your initial refresh token, follow this guide: https://benwiz.com/blog/create-spotify-refresh-token/
+5. In order to generate your initial refresh token, follow [this](https://benwiz.com/blog/create-spotify-refresh-token/) guide 
 
 ### Store Spotify Credentials in AWS Secrets Manager
 
