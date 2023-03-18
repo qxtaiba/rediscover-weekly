@@ -43,7 +43,7 @@ def lambda_handler(event, context):
 
 
 def get_access_token_from_secret(secrets_manager, client_id, client_secret):
-    secrets_response = secrets_manager.get_secret_value(SecretId='spotify-access-token')
+    secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
     secrets_json = json.loads(secrets_response['SecretString'])
     access_token = secrets_json['access_token']
     expiry_time = datetime.fromisoformat(secrets_json['expiry_time'])
