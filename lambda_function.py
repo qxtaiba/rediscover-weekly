@@ -12,16 +12,9 @@ def lambda_handler(event, context):
     secrets_json = json.loads(secrets_response['SecretString'])
     client_id = secrets_json['spotify_client_id']
     client_secret = secrets_json['spotify_client_secret']
-    
-    # Get the access token and its expiry time from Secret Manager
-    access_token, expires_at = get_access_token_from_secret(secrets_manager, client_id, client_secret)
 
-    # If access token is expired or about to expire, generate a new access token
-    if is_access_token_expired(expires_at):
-        access_token = generate_access_token(client_id, client_secret, secrets_manager)
-        
     # Create a Spotipy client
-    client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret, access_token=access_token)
+    client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
     # Get the tracks in the source playlist
@@ -40,34 +33,6 @@ def lambda_handler(event, context):
         return {'statusCode': 200, 'body': '{} new tracks added to target playlist'.format(len(new_track_uris))}
     else:
         return {'statusCode': 200, 'body': 'No new tracks to add to target playlist'}
-
-
-def get_access_token_from_secret(secrets_manager, client_id, client_secret):
-    secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
-    secrets_json = json.loads(secrets_response['SecretString'])
-    access_token = secrets_json['access_token']
-    expires_at = datetime.fromtimestamp(secrets_json['expires_at'])
-    return access_token, expires_at
-
-
-def is_access_token_expired(expires_at):
-    return expires_at - timedelta(minutes=5) <= datetime.now()
-
-
-def generate_access_token(client_id, client_secret, secrets_manager):
-    token_url = 'https://accounts.spotify.com/api/token'
-    client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    access_token = sp._auth_manager.get_access_token()
-    expires_at = datetime.now() + timedelta(seconds=access_token['expires_in'])
-    # Store the new access token and expiry time in Secret Manager
-    secrets_manager.put_secret_value(SecretId='spotify-credentials', SecretString=json.dumps({
-        'access_token': access_token['access_token'],
-        'expiry_at': expires_at.isoformat()
-    }))
-    return access_token['access_token']
-
-
 
 def get_playlist_tracks(sp, playlist_id):
     results = sp.playlist_items(playlist_id, fields='items.track.uri,total', additional_types=['track'])
