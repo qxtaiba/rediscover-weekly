@@ -7,7 +7,7 @@ import json
 import time
 
 def lambda_handler(event, context):
-    # Get the Spotify client ID and secret from the Secrets Manager secret
+    # Get the Spotify client ID and secret from Secrets Manager
     secrets_manager = boto3.client('secretsmanager')
     secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
     secrets_json = json.loads(secrets_response['SecretString'])
@@ -16,7 +16,7 @@ def lambda_handler(event, context):
     client_secret = secrets_json['spotify_client_secret']
     refresh_token = secrets_json['refresh_token']
 
-    # Get the cached access token and its expiry time from the Secrets Manager secret
+    # Get the access token and its expiry time from Secrets Manager
     access_token = secrets_json['access_token']
     expires_at = secrets_json['expires_at']
 
