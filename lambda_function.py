@@ -23,7 +23,7 @@ def lambda_handler(event, context):
     # Get the existing access token and check if it has expired
     access_token = secrets_json.get('access_token')
     expires_at = secrets_json.get('expires_at')
-    if access_token is None or time.time() > expires_at - 300:
+    if access_token is None or time.time() >float(expires_at) - 300:
         auth_manager.refresh_access_token(refresh_token)
         access_token = auth_manager.get_access_token()['access_token']
         expires_at = time.time() + auth_manager.expires_in
