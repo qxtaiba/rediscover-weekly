@@ -1,10 +1,10 @@
-# (re)Discover Weekly
+# [(re)Discover Weekly](https://open.spotify.com/playlist/2mULMNIOjAkmgJvE6J7YhL?si=b167f382262c426c)
 
-This AWS Lambda function synchronizes tracks from a source playlist to a target playlist using the Spotify API. The function is triggered by a scheduled event in AWS CloudWatch Events, which executes the function at a specified time interval.
+This script allows you to synchronizes songs from a source playlist to a target playlist using the Spotify API. The function is triggered by a scheduled event in AWS CloudWatch Events, which executes the function at a specified time interval using a cron schedule. 
 
 ## Architecture 
 
-The Lambda function is written in Python and utilizes the following AWS services:
+The script is written in Python and is orchestrated the following AWS services:
 
 - **AWS Lambda**: the function is hosted on the Lambda service.
 - **AWS Secrets Manager**: stores the client ID, client secret, and refresh token for the Spotify API.
