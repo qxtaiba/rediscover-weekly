@@ -13,6 +13,9 @@ def lambda_handler(event, context):
     client_id = secrets_json['spotify_client_id']
     client_secret = secrets_json['spotify_client_secret']
 
+    # Get the access token and its expiry time
+    access_token = get_access_token(client_id, client_secret)
+
     # Create a Spotipy client
     client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -33,6 +36,15 @@ def lambda_handler(event, context):
         return {'statusCode': 200, 'body': '{} new tracks added to target playlist'.format(len(new_track_uris))}
     else:
         return {'statusCode': 200, 'body': 'No new tracks to add to target playlist'}
+
+
+def get_access_token(client_id, client_secret):
+    token_url = 'https://accounts.spotify.com/api/token'
+    client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    access_token = sp._auth_manager.get_access_token()
+    return access_token
+
 
 def get_playlist_tracks(sp, playlist_id):
     results = sp.playlist_items(playlist_id, fields='items.track.uri,total', additional_types=['track'])
