@@ -10,6 +10,7 @@ def lambda_handler(event, context):
     secrets_manager = boto3.client('secretsmanager')
     secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
     secrets_json = json.loads(secrets_response['SecretString'])
+    print(secrets_json)
     client_id = secrets_json['spotify_client_id']
     client_secret = secrets_json['spotify_client_secret']
 
