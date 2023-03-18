@@ -25,9 +25,7 @@ def lambda_handler(event, context):
         access_token, expires_at = refresh_token_method(refresh_token, client_id, client_secret)
         
         # Update the Secrets Manager secret with the new access token and expiry time
-        secrets_json['access_token'] = access_token
-        secrets_json['expires_at'] = expires_at
-        secrets_manager.put_secret_value(SecretId='spotify-credentials', SecretString=json.dumps(secrets_json))
+        secrets_manager.update_secret(SecretId='spotify-credentials', SecretString=json.dumps({'access_token': access_token, 'expires_at': expires_at}))
 
     # Initialize the Spotify object with the refreshed access token
     sp = spotipy.Spotify(auth=access_token)
