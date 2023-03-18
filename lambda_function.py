@@ -14,32 +14,19 @@ def lambda_handler(event, context):
     client_secret = secrets_json['spotify_client_secret']
     refresh_token = secrets_json['refresh_token']
     
-    # Authenticate using SpotifyOAuth and get a new access token if necessary
+    # Authenticate using SpotifyOAuth and get a new access token if needed
     auth_manager = SpotifyOAuth(client_id=client_id,
                                 client_secret=client_secret,
-                                redirect_uri='http://127.0.0.1:8888/callback',
-                                scope=['playlist-modify-public'],
-                                cache_path='.spotifycache')
+                                redirect_uri="http://127.0.0.1:8888/callback",
+                                scope=["playlist-modify-public"],
+                                cache_path=".spotifycache")
     
-    sp = spotipy.Spotify(auth_manager=auth_manager)
+    if auth_manager.get_cached_token() is None or time.time() > auth_manager.get_cached_token()['expires_at'] - 300:
+        auth_manager.refresh_access_token(refresh_token)
     access_token = auth_manager.get_cached_token()['access_token']
-    expires_at = auth_manager.get_cached_token()['expires_at']
-    
-    # Check if access token is expired or about to expire
-    if access_token is None or time.time() > expires_at - 300:
-        auth_manager.get_access_token(refresh_token)
-        access_token = auth_manager.get_cached_token()['access_token']
-        expires_at = auth_manager.get_cached_token()['expires_at']
-        
-        # Update the access token and expiration time in the secret
-        secrets_manager.update_secret(SecretId='spotify-credentials',
-                                      SecretString=json.dumps({'spotify_client_id': client_id,
-                                                               'spotify_client_secret': client_secret,
-                                                               'refresh_token': refresh_token,
-                                                               'access_token': access_token,
-                                                               'expires_at': expires_at}))
-    
+
     # Get the tracks in the source playlist
+    sp = spotipy.Spotify(auth_manager=auth_manager)
     source_playlist_id = "37i9dQZEVXcCKUxFWSD1WC"
     source_track_uris = get_playlist_tracks(sp, source_playlist_id)
     
