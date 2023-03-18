@@ -14,10 +14,10 @@ def lambda_handler(event, context):
     client_secret = secrets_json['spotify_client_secret']
     
     # Get the access token and its expiry time from Secret Manager
-    access_token, expiry_time = get_access_token_from_secret(secrets_manager, client_id, client_secret)
+    access_token, expires_at = get_access_token_from_secret(secrets_manager, client_id, client_secret)
 
     # If access token is expired or about to expire, generate a new access token
-    if is_access_token_expired(expiry_time):
+    if is_access_token_expired(expires_at):
         access_token = generate_access_token(client_id, client_secret, secrets_manager)
         
     # Create a Spotipy client
@@ -59,11 +59,11 @@ def generate_access_token(client_id, client_secret, secrets_manager):
     client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     access_token = sp._auth_manager.get_access_token()
-    expiry_time = datetime.now() + timedelta(seconds=access_token['expires_in'])
+    expires_at = datetime.now() + timedelta(seconds=access_token['expires_in'])
     # Store the new access token and expiry time in Secret Manager
     secrets_manager.put_secret_value(SecretId='spotify-access-token', SecretString=json.dumps({
         'access_token': access_token['access_token'],
-        'expiry_time': expiry_time.isoformat()
+        'expiry_at': expires_at.isoformat()
     }))
     return access_token['access_token']
 
