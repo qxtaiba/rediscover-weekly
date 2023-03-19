@@ -5,6 +5,11 @@ from spotipy.oauth2 import SpotifyOAuth
 import boto3
 import json
 import time
+import re
+
+# Define URL for source and target playlists
+SOURCE_PLAYLIST_URL = 'https://open.spotify.com/playlist/37i9dQZEVXcCKUxFWSD1WC?si=b67b01499f314f9c'
+TARGET_PLAYLIST_URL = 'https://open.spotify.com/playlist/2mULMNIOjAkmgJvE6J7YhL?si=373ae7ba488d4050'
 
 def lambda_handler(event, context):
     # Get the Spotify client ID and secret from Secrets Manager
@@ -31,11 +36,11 @@ def lambda_handler(event, context):
     sp = spotipy.Spotify(auth=access_token)
 
     # Get the tracks in the source playlist
-    source_playlist_id = "37i9dQZEVXcCKUxFWSD1WC"
+    source_playlist_id = extract_playlist_id(SOURCE_PLAYLIST_URL)
     source_track_uris = get_playlist_tracks(sp, source_playlist_id)
 
     # Get the tracks in the target playlist
-    target_playlist_id = "2mULMNIOjAkmgJvE6J7YhL"
+    target_playlist_id = extract_playlist_id(TARGET_PLAYLIST_URL)
     target_track_uris = get_playlist_tracks(sp, target_playlist_id)
 
     # Filter out the tracks that already exist in the target playlist
@@ -47,6 +52,19 @@ def lambda_handler(event, context):
         return {'statusCode': 200, 'body': '{} new tracks added to target playlist'.format(len(new_track_uris))}
     else:
         return {'statusCode': 200, 'body': 'No new tracks to add to target playlist'}
+
+def extract_playlist_id_regex(playlist_url):
+    regex = r'^https://open.spotify.com/playlist/([a-zA-Z0-9]+)\??.*$'
+    match = re.match(regex, playlist_url)
+    if match:
+        return match.group(1)
+    raise ValueError('Invalid Playlist URL')
+
+def extract_playlist_id(playlist_url):
+    prefix = 'https://open.spotify.com/playlist/'
+    if playlist_url.startswith(prefix):
+        return playlist_url.split('/')[-1].split('?')[0]
+    raise ValueError('Invalid Playlist URL')
 
 def get_playlist_tracks(sp, playlist_id):
     results = sp.playlist_tracks(playlist_id)
