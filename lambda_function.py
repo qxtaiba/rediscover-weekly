@@ -7,21 +7,22 @@ import json
 import time
 import re
 
-# Define URL for source and target playlists
-SOURCE_PLAYLIST_URL = 'https://open.spotify.com/playlist/37i9dQZEVXcCKUxFWSD1WC?si=b67b01499f314f9c'
-TARGET_PLAYLIST_URL = 'https://open.spotify.com/playlist/2mULMNIOjAkmgJvE6J7YhL?si=373ae7ba488d4050'
-
 def lambda_handler(event, context):
-    # Get the Spotify client ID and secret from Secrets Manager
+    # Define URL for source and target playlists
+    SOURCE_PLAYLIST_URL = 'https://open.spotify.com/playlist/37i9dQZEVXcCKUxFWSD1WC?si=b67b01499f314f9c'
+    TARGET_PLAYLIST_URL = 'https://open.spotify.com/playlist/2mULMNIOjAkmgJvE6J7YhL?si=373ae7ba488d4050'
+
+    # Initialise the Secretes Manager client and get Spotify credentials
     secrets_manager = boto3.client('secretsmanager')
     secrets_response = secrets_manager.get_secret_value(SecretId='spotify-credentials')
     secrets_json = json.loads(secrets_response['SecretString'])
 
+    # Get the Spotify client ID and secret from Secrets Manager
     client_id = secrets_json['spotify_client_id']
     client_secret = secrets_json['spotify_client_secret']
-    refresh_token = secrets_json['refresh_token']
 
-    # Get the access token and its expiry time from Secrets Manager
+    # Get the refresh token, access token, and its expiry time from Secrets Manager
+    refresh_token = secrets_json['refresh_token']
     access_token = secrets_json['access_token']
     expires_at = secrets_json['expires_at']
 
@@ -30,7 +31,13 @@ def lambda_handler(event, context):
         access_token, expires_at = refresh_token_method(refresh_token, client_id, client_secret)
         
         # Update the Secrets Manager secret with the new access token and expiry time
-        secrets_manager.update_secret(SecretId='spotify-credentials', SecretString=json.dumps({'access_token': access_token, 'expires_at': expires_at}))
+        secrets_manager.update_secret(SecretId='spotify-credentials', SecretString=json.dumps({
+            'access_token': access_token, 
+            'expires_at': expires_at,
+            'spotify_client_id': client_id,
+            'spotify_client_secret': client_secret,
+            'refresh_token': refresh_token
+        }))
 
     # Initialize the Spotify object with the refreshed access token
     sp = spotipy.Spotify(auth=access_token)
